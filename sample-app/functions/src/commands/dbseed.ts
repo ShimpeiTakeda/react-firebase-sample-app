@@ -7,19 +7,21 @@ import { Publisher } from '../services/react-firebase-sample-app/models/publishe
 import { collectionName } from '../services/react-firebase-sample-app/constants';
 import { addCounter } from '../firestore-admin/record-counter';
 
-import serviceAccount from '../reactreact-firebase-sample-ap-d2a4b-firebase-adminsdk.json'
+import serviceAccount from '../react-firebase-sample-ap-d2a4b-firebase-adminsdk.json';
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
 });
 
 const db = admin.firestore();
+
 const uploadSeed = async (collection: string, seedFile: string) => {
   const buffer = fs.readFileSync(seedFile);
   const records = parse(buffer.toString(), {
     columns: true,
     delimiter: '\t',
-    skip_empty_lines: true,
+    skip_empty_lines: true // eslint-disable-line @typescript-eslint/camelcase
   });
   const ref = db.collection(collection);
 
@@ -28,9 +30,9 @@ const uploadSeed = async (collection: string, seedFile: string) => {
       const docs: Required<Publisher>[] =
         records.map((record: Publisher) => ({
           ...record,
-          website: record.website ? record.website : null,
+          website: record.website ?? null,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
         })) || [];
 
       for await (const doc of docs) {
@@ -50,7 +52,7 @@ const uploadSeed = async (collection: string, seedFile: string) => {
 
 commander
   .version('0.1.0', '-v, --version')
-  .arguments('<collection><seedFile>')
+  .arguments('<collection> <seedFile>')
   .action(uploadSeed);
 
 commander.parse(process.argv);
